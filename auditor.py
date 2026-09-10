@@ -10,13 +10,5 @@ while exit != "quit":
         inventory += int(exit)
         print("Current stock quantity: ", inventory)
 
-    if inventory > 500:
-        print("\nYou have exceeded the total inventory: ", inventory)
-        break
-    elif(inventory == 500):
-        print("\nYou have reached the maximum total inventory: ", inventory)
-        break
     exit = input("\nPlease enter stock quantity or type 'quit' to exit: ")
 
-print("\n\nTotal units processed: ", inventory)
-print("Number of Failed/Rejected Entries: ", i,"\n")
