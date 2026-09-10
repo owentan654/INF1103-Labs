@@ -18,5 +18,5 @@ while exit != "quit":
         break
     exit = input("\nPlease enter stock quantity or type 'quit' to exit: ")
 
-print("\n\nTotal units processed: ", inventory)
+print("\n\nTotal units processed: ", inventory, "units.")
 print("Number of Failed/Rejected Entries: ", i,"\n")
