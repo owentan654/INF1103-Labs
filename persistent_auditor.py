@@ -16,7 +16,9 @@ inventory = 0
 
 def get_valid_input():
     global failed_entries
-    product_name = input("Enter Product Name:")
+    product_name = input("\nEnter Product Name:")
+    if product_name == "quit":
+            return "quit"
     qty_input = input("Enter Quantity:")
     if qty_input == "quit":
         return "quit"
@@ -44,6 +46,7 @@ def generate_report(total_inventory, failed_entries):
     print("\n\nTotal units processed: ", total_inventory, "units.")
     print("Number of Failed/Rejected Entries: ", failed_entries)
     print("Total tax to be paid: $", f"{calculate_tax(total_inventory):.2f}")
+    print("Current Order: ", products)
 
 #load_inventory()
 products = []
@@ -55,18 +58,18 @@ while True:
     if result is None:
         continue
 
-    if inventory + result[0] > 500:
+    '''if inventory + result[0] > 500:
         print("\nThis would exceed the total inventory: ", inventory)
-        break
+        break'''
 
     length = 1001 + len(products)
     products.append((length, result[1], result[0]))
 
     inventory = process_delivery(inventory, result[0])
-    print("Current delivery processed: ", inventory)
+    print("New Order Added: ", products[-1])
 
-    if inventory == 500:
+    '''if inventory == 500:
        print("\nYou have reached the maximum total inventory: ", inventory)
-       break
+       break'''
 
 generate_report(inventory, failed_entries)
