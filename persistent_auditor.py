@@ -19,7 +19,7 @@ def load_inventory():
 
     return products
 
-def save_order(order):
+def save_inventory(order):
     with open("orders.txt", "a") as file:
         print(*order, sep = ",", file = file)                   
 
@@ -57,7 +57,7 @@ def generate_report(total_inventory, failed_entries):
     print("Total tax to be paid: $", f"{calculate_tax(total_inventory):.2f}")
     print("Current Order: ")
     for product in products: 
-            print (*product, sep = ",")
+            print (*product, sep = ", ")
 
 #load_inventory()
 products = load_inventory()
@@ -92,10 +92,10 @@ while True:
 
     inventory = process_delivery(inventory, result[1])
 
-    save_order(new_order)
+    save_inventory(new_order)
 
     print("\nNew Order Added: ")
-    print(*new_order, sep = ",")
+    print(*new_order, sep = ", ")
     print("\n\nOrder successfully saved to orders.txt")
 
     '''if inventory == 500:
