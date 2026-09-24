@@ -17,7 +17,12 @@ def load_inventory():
     except FileNotFoundError:
         print("orders.txt file not found. Starting with an empty order list.")
 
-    return products
+    if"orders.txt".is_file():
+        with open("orders.txt", "r", encoding = "utf-8") as file:
+             open("orders.txt", "a", encoding = "utf-8")
+    else:
+         with open("orders.txt", "w", encoding = "utf-8") as file:
+              return products
 
 def save_inventory(order):
     with open("orders.txt", "a") as file:
