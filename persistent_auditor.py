@@ -16,10 +16,10 @@ inventory = 0
 
 def get_valid_input():
     global failed_entries
-    product_name = input("\nEnter Product Name:")
+    product_name = input("\nEnter Product Name: ")
     if product_name == "quit":
             return "quit"
-    qty_input = input("Enter Quantity:")
+    qty_input = input("Enter Quantity: ")
     if qty_input == "quit":
         return "quit"
     try:
@@ -66,7 +66,10 @@ while True:
     products.append((length, result[1], result[0]))
 
     inventory = process_delivery(inventory, result[0])
-    print("New Order Added: ", products[-1])
+    print("New Order Added: ")
+    for product in products: 
+        print (*product, sep = ",")
+    print("Order successfully saved to orders.txt")
 
     '''if inventory == 500:
        print("\nYou have reached the maximum total inventory: ", inventory)
