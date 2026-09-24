@@ -77,9 +77,6 @@ while True:
     if result is None:
         continue
 
-    '''if inventory + result[0] > 500:
-        print("\nThis would exceed the total inventory: ", inventory)
-        break'''
 #No idea what is this for but ai says so
 #    if products:
 #        serial_number = products[-1][0] + 1
@@ -97,9 +94,5 @@ while True:
     print("\nNew Order Added: ")
     print(*new_order, sep = ", ")
     print("\n\nOrder successfully saved to orders.txt")
-
-    '''if inventory == 500:
-       print("\nYou have reached the maximum total inventory: ", inventory)
-       break'''
 
 generate_report(inventory, failed_entries)
