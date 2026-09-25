@@ -4,7 +4,7 @@ inventory = 0
 def load_inventory():
     products = []
     try:
-        with open("orders.txt", "r") as file:
+        with open("orders.txt", "r", encoding="utf-8") as file:
             for line in file:
                 parts = line.strip().split(",")
 
@@ -17,15 +17,13 @@ def load_inventory():
     except FileNotFoundError:
         print("orders.txt file not found. Starting with an empty order list.")
 
-    if"orders.txt".is_file():
-        with open("orders.txt", "r", encoding = "utf-8") as file:
-             open("orders.txt", "a", encoding = "utf-8")
-    else:
-         with open("orders.txt", "w", encoding = "utf-8") as file:
-              return products
+    with open("orders.txt", "a", encoding="utf-8"):
+         pass  # Create the file if it doesn't exist
+
+    return products
 
 def save_inventory(order):
-    with open("orders.txt", "a") as file:
+    with open("orders.txt", "a", encoding="utf-8") as file:
         print(*order, sep = ",", file = file)                   
 
 def get_valid_input():
