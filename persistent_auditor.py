@@ -1,10 +1,11 @@
 failed_entries = 0
 inventory = 0
 
+#Check inventory and create if dosen't exist
 def load_inventory():
     products = []
     try:
-        with open("orders.txt", "r", encoding="utf-8") as file:
+        with open("orders.txt", "r", encoding = "utf-8") as file:
             for line in file:
                 parts = line.strip().split(",")
 
@@ -17,13 +18,13 @@ def load_inventory():
     except FileNotFoundError:
         print("orders.txt file not found. Starting with an empty order list.")
 
-    with open("orders.txt", "a", encoding="utf-8"):
+    with open("orders.txt", "a", encoding = "utf-8"):
          pass  # Create the file if it doesn't exist
 
     return products
 
 def save_inventory(order):
-    with open("orders.txt", "a", encoding="utf-8") as file:
+    with open("orders.txt", "a", encoding = "utf-8") as file:
         print(*order, sep = ",", file = file)                   
 
 def get_valid_input():
@@ -58,10 +59,16 @@ def generate_report(total_inventory, failed_entries):
     print("\n\nTotal units processed: ", total_inventory, "units.")
     print("Number of Failed/Rejected Entries: ", failed_entries)
     print("Total tax to be paid: $", f"{calculate_tax(total_inventory):.2f}")
-    print("Current Order: ")
-    for product in products: 
-            print (*product, sep = ", ")
+    #print("Current Order: ")
+    #for product in products: 
+    #        print (*product, sep = ", ")
 
+def final_save_inventory(total_inventory, failed_entries):
+    with open("report.txt", "w", encoding="utf-8") as file:
+        file.write(f"Total units processed: {total_inventory} units.\n")
+        file.write(f"Number of Failed/Rejected Entries: {failed_entries}\n")
+        file.write(f"Total tax to be paid: ${calculate_tax(total_inventory):.2f}\n")
+            
 #load_inventory()
 products = load_inventory()
 for product in products:
@@ -86,8 +93,8 @@ while True:
 #    else:
 #        serial_number = 1001
 
-    length = 1001 + len(products)
-    new_order = ((length, result[0], result[1]))
+    serial_number = 1001 + len(products)
+    new_order = (serial_number, result[0], result[1])
     products.append(new_order)
 
     inventory = process_delivery(inventory, result[1])
@@ -99,3 +106,4 @@ while True:
     print("\n\nOrder successfully saved to orders.txt")
 
 generate_report(inventory, failed_entries)
+final_save_inventory(inventory, failed_entries)
