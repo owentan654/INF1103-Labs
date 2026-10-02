@@ -85,6 +85,13 @@ def update_stock(orders):
                 return
     print(f"Product ID '{product_id}' not found in the inventory.")
 
+def search_product(item):
+    item_name = input("Enter Product ID: ").strip()
+    results = [
+        items
+        for items in item
+        if item_name == item["id"]
+    ]
 #Display inventory
 def display_all(inventory):
     if len(inventory) == 0:
