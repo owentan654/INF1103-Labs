@@ -61,17 +61,31 @@ def add_product(stocks):
     }
     stocks.append(new_product)
     print(f"Product '{product_name}' added successfully.")
-    with open(FILE_NAME, "a", encoding = "utf-8") as file:
-        json.dump(new_product, file)
-        file.write("\n")
+    #with open(FILE_NAME, "a", encoding = "utf-8") as file:
+    #    json.dump(new_product, file)
+    #    file.write("\n")
 
 def update_stock(orders):
     product_id = input("Enter Product ID: ").strip()
     for product in orders:
         if product["id"] == product_id:
-            new_stock = input("Enter new stock quantity: ")
+            try:
+                new_stock = int(input(
+                    f"Current stock for {product['Product_name']} is {product['Stock']}.Enter new stock quantity: "
+                    )
+                )
+                if new_stock < 0:
+                    print("Stock quantity cannot be negative. Please key in a positive value.")
+                    return
+                product["Stock"] = new_stock
+                print(f"Stock for {product['Product_name']} has been updated to {new_stock}.")
+                return
+            except ValueError:
+                print("Invalid stock quantity entered.")
+                return
+    print(f"Product ID '{product_id}' not found in the inventory.")
 
-
+#Display inventory
 def display_all(inventory):
     if len(inventory) == 0:
         print("\nThe inventory is currently empty.")
