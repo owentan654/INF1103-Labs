@@ -1,35 +1,89 @@
+import os
+import json
+
+FILE_NAME = "inventory.json"
 failed_entries = 0
 inventory = 0
 
-#Check inventory and create if dosen't exist
+#Check inventory and create if it doesn't exist
 def load_inventory():
-    products = []
-    try:
-        with open("inventory.txt", "r", encoding = "utf-8") as file:
-            for line in file:
-                parts = line.strip().split(",")
+    if os.path.exists(FILE_NAME):
+        try:
+            with open(FILE_NAME, "r", encoding = "utf-8") as file:
+                inventory = json.load(file)
+                print("Inventory loaded successfully from inventory.json.")
+                return inventory
+        except (json.JSONDecodeError, IOError):
+            print("Error loading JSON file. Starting with empty inventory.")
+            return []
+    else:
+        print("No inventory file found. Initializing with default products.")
+        return[
+            {"id": "1001", "Product_name": "Laptop", "Price": 1200.00, "Stock": 15},
+            {"id": "1002", "Product_name": "Mouse", "Price": 25.50, "Stock": 40},
+            {"id": "1003", "Product_name": "Keyboard", "Price": 45.00, "Stock": 25},          
+        ]
 
-                if parts == "==============================":
-                    break
-
-                if len(parts) == 3:
-                    serial_number = int(parts[0])
-                    product_name = parts[1]
-                    quantity = int(parts[2])
-
-                    products.append((serial_number, product_name, quantity))
-    except FileNotFoundError:
-        print("inventory.txt file not found. Starting with an empty inventory.")
-
-    with open("inventory.txt", "a", encoding = "utf-8"):
-         pass  # Create the file if it doesn't exist
-
-    return products
-
+#Saves new orders to json file
 def save_inventory(order):
-    with open("inventory.txt", "a", encoding = "utf-8") as file:
-        print(*order, sep = ",", file = file)                   
+    with open(FILE_NAME, "a", encoding = "utf-8") as file:
+        json.dump(order, file)
+        file.write("\n") 
 
+def add_product(stocks):
+    print("Add New Product")
+    product_id = input("Product ID: ").strip()
+
+    #Checking for dupes
+    for items in stocks:
+        if items["id"] == product_id:
+            print(f"Error: Product ID '{product_id}' already exists.")
+            return "Dupe"
+
+    product_name = input("Product Name: ").strip()
+
+    try:
+        items = int(input("Stock Quantity: "))
+        price = float(input("Price($): ")) 
+        if items < 0 or price < 0:
+            print("Stock and Price must be above 0. Please try again.")
+            return "Invalid"
+    except ValueError:
+        print("Invalid input. Stock must be an integer and price a number. Please try again.")
+        return None
+
+    #Store new product in a dictionary
+    new_product = {
+        "id": product_id,
+        "Product_name": product_name,
+        "Price": price,
+        "Stock": items
+    }
+    stocks.append(new_product)
+    print(f"Product '{product_name}' added successfully.")
+    with open(FILE_NAME, "a", encoding = "utf-8") as file:
+        json.dump(new_product, file)
+        file.write("\n")
+
+def update_stock(orders):
+    product_id = input("Enter Product ID: ").strip()
+    for product in orders:
+        if product["id"] == product_id:
+            new_stock = input("Enter new stock quantity: ")
+
+
+def display_all(inventory):
+    if len(inventory) == 0:
+        print("\nThe inventory is currently empty.")
+        return
+
+    print("\n" + "="*55)
+    for stuff in inventory:
+        print(
+            f"{stuff['id']: <10} {stuff['Product_name']: <20} {stuff['Stock']: <10} {stuff['Price']: <10.2f}"
+        )
+    print("\n" + "="*55)
+    
 def get_valid_input():
     global failed_entries
     product_name = input("\nEnter Product Name: ")
@@ -64,7 +118,8 @@ def generate_report(total_inventory, failed_entries, orders):
     print("\n\nTotal units processed: ", total_inventory, "units.")
     print("Number of Failed/Rejected Entries: ", failed_entries)
     print("Total tax to be paid: $", f"{calculate_tax(total_inventory):.2f}")
-    with open("inventory.txt", "w", encoding="utf-8") as file:
+    #Rewrite the whole inventory.txt file with the final report
+    with open(FILE_NAME, "w", encoding="utf-8") as file:
         for order in orders:
             file.write(f"{order[0]},{order[1]},{order[2]}\n")
         file.write("\n\n==============================\nFinal Report:\n==============================\n")
@@ -72,9 +127,7 @@ def generate_report(total_inventory, failed_entries, orders):
         file.write(f"Number of Failed/Rejected Entries: {failed_entries}\n")
         file.write(f"Total tax to be paid: ${calculate_tax(total_inventory):.2f}\n")
         file.write("==============================\n")
-    print("Current Order: ")
-    for order in orders: 
-            print (*order, sep = ", ")
+    display_all(orders)
     print("\nInventory report saved to inventory.txt")
             
 #load_inventory()
@@ -85,9 +138,7 @@ print("To exit the program, type 'quit'.\n")
 
 while True:
 
-    print("Current Orders: \n\n")
-    for product in products: 
-        print (*product, sep = ",")
+    display_all(products)
 
     result = get_valid_input()
     if result == "quit":
@@ -95,16 +146,15 @@ while True:
     if result is None:
         continue
 
-#No idea what is this for but ai says so
-#    if products:
-#        serial_number = products[-1][0] + 1
-#    else:
-#        serial_number = 1001
-
     if process_delivery(inventory, result[1]) is None:
         print("Inventory limit exceeded 500.")
         break
-    serial_number = 1001 + len(products)
+
+    #To check serial number for new orders, and make sure it starts from 1001
+    if products:
+        serial_number = products[-1][0] + 1
+    else:
+        serial_number = 1001
     new_order = (serial_number, result[0], result[1])
     products.append(new_order)
     inventory = process_delivery(inventory, result[1])
