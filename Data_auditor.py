@@ -157,7 +157,7 @@ def display_all(stocks):
 
 # Menu
 def print_menu():
-    print("\n===== Menu =====")
+    print("\n======= Menu =======")
     print("1. Display All Products")
     print("2. Add Product")
     print("3. Update Stock")
