@@ -57,7 +57,6 @@ import json, os
 
 FILE_NAME = "inventory.json"
 failed_entries = 0
-inventory = 0
 
 def load_inventory():
     inventory = Inventory()
