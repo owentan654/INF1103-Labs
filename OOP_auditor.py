@@ -19,7 +19,7 @@ class Product:
         return True
 
     def display_information(self):
-        print(f"{self.__product_idK:<10} {self.__name:<20}"
+        print(f"{self.__product_id:<10} {self.__name:<20}"
               f"{self.__stock:<10} {self.__price:<10.2f}")
 
     def to_dict(self):
@@ -84,3 +84,60 @@ def save_inventory(inventory):
         json.dump(data, file, indent = 4)
     print("Inventory saved.")
 
+def main():
+    inventory = load_inventory()
+
+    while True:
+        print("\n1. Display all  2. Add product  3. Upate stock")
+        print("4. Search Product  5. Save inventory  6. Exit")
+        choice = input("Choice: ").strip()
+
+        if choice == "1":
+            inventory.display_all()
+
+        elif choice == "2":
+            pid = input("Product ID: ").strip()
+            name = input("Product name: ").strip()
+            try:
+                price = float(input("Price: "))
+                stock = int(input("Stock: "))
+            except ValueError:
+                print("Invalid number entered.")
+                continue
+            if inventory.add_product(Product(pid, name, price, stock)):
+                print("Product added.")
+            else:
+                print("That ID already exists.")
+
+        elif choice == "3":
+            product = inventory.search_product(input("Product ID: ").strip())
+            if product is None:
+                print("Product not found.")
+                continue
+            try:
+                qty = int(input("New stock quantity: "))
+            except ValueError:
+                print("Invalid quantity.")
+                continue
+            if product.update_stock(qty):
+                print("Stock updated.")
+            else:
+                print("Stock cannot be negative.")
+
+        elif choice == "4":
+            product = inventory.search_product(input("Product ID: ").strip())
+            if product:
+                product.display_information()
+            else:
+                print("Product not found.")
+
+        elif choice == "5":
+            save_inventory(inventory)
+
+        elif choice == "6":
+            break
+
+        else:
+            print("Invalid choice.")
+
+main()
