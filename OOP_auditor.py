@@ -71,3 +71,16 @@ def load_inventory():
                     ))
         except (json.JSONDecodeError, IOError, KeyError):
             print("Error loading file. Starting empty.")
+    else:
+        print("No file found. Using default products.")
+        inventory.add_product(Product("P001", "Laptop", 1200.00, 15))
+        inventory.add_product(Product("P002", "Mouse", 25.50, 40))
+        inventory.add_product(Product("P003", "Keyboard", 45.00, 25))
+    return inventory
+
+def save_inventory(inventory):
+    data = [p.to_dict() for p in inventory.get_products()]
+    with open(FILE_NAME, "w", encoding="utf-8") as file:
+        json.dump(data, file, indent = 4)
+    print("Inventory saved.")
+
