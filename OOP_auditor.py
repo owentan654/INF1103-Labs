@@ -85,10 +85,20 @@ def save_inventory(inventory):
 
 def main():
     inventory = load_inventory()
+    menu = [
+        "Display all products",
+        "Add product",
+        "Update stock",
+        "Search Product",
+        "Save Inventory",
+        "Exit"
+    ]
 
     while True:
-        print("\n1. Display all  2. Add product  3. Upate stock")
-        print("4. Search Product  5. Save inventory  6. Exit")
+        print("\n===== Inventory Menu =====")
+        for i, item in enumerate(menu, start=1):
+            print(f"{i}. {item}")
+        print("==========================")
         choice = input("Choice: ").strip()
 
         if choice == "1":
