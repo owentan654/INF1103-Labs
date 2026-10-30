@@ -1,3 +1,7 @@
+import json, os
+FILE_NAME = "inventory.json"
+REPORT_FILE = "report.txt"
+
 class Product: 
     def __init__(self, product_id, name, price, stock):
         self.__product_id = product_id
@@ -11,6 +15,9 @@ class Product:
 
     def get_name(self):
         return self.__name
+
+    def get_stock(self):
+        return self.__stock
 
     def update_stock(self,quantity):
         if quantity < 0:
@@ -53,10 +60,15 @@ class Inventory:
     def get_products(self):
         return self.__products
 
-import json, os
+    MAX_UNITS = 500
+    TAX_RATE = 0.1
+    def get_total_units(self):
+        return sum(p.get_stock() for p in self.__products)
+    def exceeds_limits(self, extra_units):
+        return self.get_total_units + extra_units > self.MAX_UNITS
 
-FILE_NAME = "inventory.json"
-failed_entries = 0
+    def calculate_tax(self):
+        return self.TAX_RATE * self.get_total_units
 
 def load_inventory():
     inventory = Inventory()
@@ -83,8 +95,25 @@ def save_inventory(inventory):
         json.dump(data, file, indent = 4)
     print("Inventory saved.")
 
+def generate_report(inventory, failed_entries):
+    lines = [
+        "=" * 30,
+        "Final Report:",
+        "=" * 30,
+        f"Total units processed: {inventory.get_total_units()} units.",
+        f"Number of Failed/Rejected Entries: {failed_entries}",
+        f"Total tax to be paid: ${inventory.calculate_tax():.2f}",
+        "=" * 30,
+    ]
+    report = "\n".join(lines)
+    print("\n" + report)
+    with open(REPORT_FILE, "w", encoding="utf-8") as f:
+        f.write(report + "\n")
+    print(f"\nReport saved to {REPORT_FILE}")
+
 def main():
     inventory = load_inventory()
+    failed_entries = 0
     menu = [
         "Display all products",
         "Add product",
@@ -117,21 +146,28 @@ def main():
                 print("Product added.")
             else:
                 print("That ID already exists.")
+                failed_entries += 1
 
         elif choice == "3":
             product = inventory.search_product(input("Product ID: ").strip())
             if product is None:
                 print("Product not found.")
+                failed_entries += 1
                 continue
             try:
                 qty = int(input("New stock quantity: "))
             except ValueError:
                 print("Invalid quantity.")
+                failed_entries += 1
                 continue
-            if product.update_stock(qty):
+            if inventory.exceeds_limits(qty - product.get_stock()):
+                print(f"Inventory limit exceeded {Inventory.MAX_UNITS}.")
+                failed_entries += 1
+            elif product.update_stock(qty):
                 print("Stock updated.")
             else:
                 print("Stock cannot be negative.")
+                failed_entries += 1
 
         elif choice == "4":
             product = inventory.search_product(input("Product ID: ").strip())
@@ -139,14 +175,17 @@ def main():
                 product.display_information()
             else:
                 print("Product not found.")
+                failed_entries += 1
 
         elif choice == "5":
             save_inventory(inventory)
 
         elif choice == "6":
+            generate_report(inventory, failed_entries)
             break
 
         else:
             print("Invalid choice.")
+            failed_entries += 1
 
 main()
