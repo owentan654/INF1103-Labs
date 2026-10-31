@@ -2,7 +2,14 @@ import json, os
 FILE_NAME = "inventory.json"
 REPORT_FILE = "report.txt"
 
-class Product: 
+from abc import ABC, abstractmethod
+
+class CanBeShipped(ABC):
+    @abstractmethod
+    def calculate_shipping_cost(self):
+        pass
+
+class Product(ABC): #inherit from abstract(ABC)
     def __init__(self, product_id, name, price, stock):
         self.__product_id = product_id
         self.__name = name
@@ -32,6 +39,10 @@ class Product:
     def to_dict(self):
         return {"id": self.__product_id, "Product_name": self.__name, 
                 "Price": self.__price, "Stock": self.__stock}
+
+    @abstractmethod
+    def get_fulfilment_info(self):
+        pass
 
 class Inventory:
     def __init__(self):
@@ -65,10 +76,31 @@ class Inventory:
     def get_total_units(self):
         return sum(p.get_stock() for p in self.__products)
     def exceeds_limits(self, extra_units):
-        return self.get_total_units + extra_units > self.MAX_UNITS
+        return self.get_total_units() + extra_units > self.MAX_UNITS
 
     def calculate_tax(self):
-        return self.TAX_RATE * self.get_total_units
+        return self.TAX_RATE * self.get_total_units()
+
+class PhysicalProduct(Product, CanBeShipped):
+    def __init__(self, product_id, name, price, stock, weight):
+        super().__init__(product_id, name, price, stock)    #resuing Product's constructor
+        self.__weight = weight
+
+    def get_fulfilment_info(self):
+        return "Requires physical shipping."
+
+    def calculate_shipping_cost(self):
+        return 5.00 + 2.50 * self.__weight              #$5 + (2.5*product weight)
+
+    def display_information(self):
+        super().display_information()
+        print(f"{'':<10} Weight: {self.__weight} kg")
+
+    def to_dict(self):
+        data = super().to_dict()
+        data["type"] = "physical"
+        data["weight"] = self.__weight
+        return data
 
 def load_inventory():
     inventory = Inventory()
