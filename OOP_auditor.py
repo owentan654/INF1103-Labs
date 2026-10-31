@@ -161,6 +161,17 @@ def generate_report(inventory, failed_entries):
         f.write(report + "\n")
     print(f"\nReport saved to {REPORT_FILE}")
 
+def create_product(item):
+    kind = item ["type"]
+    if kind == "physical":
+        return PhysicalProduct(item["id"], item["Product_name"],
+                               item["Price"], item["Stock"], item["Weight"])
+    elif kind == "digital":
+        return DigitalProduct(item["id"], item["Product_name"],
+                               item["Price"], item["Stock"], item["download_size"])
+    #Executes if both if statement abv fails
+    raise ValueError(f"Unknown product type: {kind}")
+
 def main():
     inventory = load_inventory()
     failed_entries = 0
