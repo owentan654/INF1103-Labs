@@ -192,15 +192,32 @@ def main():
             inventory.display_all()
 
         elif choice == "2":
+            kind = input("Type (1 = Physical, 2 = Digital): ").strip()
+            if kind != "1" and kind != "2":
+                print("Invalid product type.")
+                failed_entries += 1
+                continue
             pid = input("Product ID: ").strip()
             name = input("Product name: ").strip()
             try:
                 price = float(input("Price: "))
                 stock = int(input("Stock: "))
+                if kind == "1":
+                    extra = float(input("Weight (kg): "))
+                else:
+                    extra = float(input("Download size (MB): "))
+                if price < 0 or stock < 0 or extra < 0:
+                    raise ValueError
             except ValueError:
-                print("Invalid number entered.")
+                print("Invalid input entered. " \
+                "Values must be non-negative numbers.")
+                failed_entries += 1
                 continue
-            if inventory.add_product(Product(pid, name, price, stock)):
+            if kind == "1":
+                product = PhysicalProduct(pid, name, price, stock, extra)
+            else:
+                product = DigitalProduct(pid, name, price, stock, extra)
+            if inventory.add_product(product):
                 print("Product added.")
             else:
                 print("That ID already exists.")
