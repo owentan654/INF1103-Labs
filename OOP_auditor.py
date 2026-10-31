@@ -120,23 +120,31 @@ class DigitalProduct(Product):
         data["download_size"] = self.__download_size
         return data
 
+def create_product(item):
+    kind = item ["type"]
+    if kind == "physical":
+        return PhysicalProduct(item["id"], item["Product_name"],
+                               item["Price"], item["Stock"], item["Weight"])
+    elif kind == "digital":
+        return DigitalProduct(item["id"], item["Product_name"],
+                               item["Price"], item["Stock"], item["download_size"])
+    #Executes if both if statement abv fails
+    raise ValueError(f"Unknown product type: {kind}")
+
 def load_inventory():
     inventory = Inventory()
     if os.path.exists(FILE_NAME):
         try:
             with open(FILE_NAME, "r", encoding="utf-8") as file:
                 for item in json.load(file):
-                    inventory.add_product(Product(
-                        item["id"], item["Product_name"],
-                        item["Price"], item["Stock"]
-                    ))
+                    inventory.add_product(create_product(item))
         except (json.JSONDecodeError, IOError, KeyError):
             print("Error loading file. Starting empty.")
     else:
         print("No file found. Using default products.")
-        inventory.add_product(Product("P001", "Laptop", 1200.00, 15))
-        inventory.add_product(Product("P002", "Mouse", 25.50, 40))
-        inventory.add_product(Product("P003", "Keyboard", 45.00, 25))
+        inventory.add_product(PhysicalProduct("P001", "Laptop", 1200.00, 15, 2.0))
+        inventory.add_product(PhysicalProduct("P002", "Mouse", 25.50, 40, 0.1))
+        inventory.add_product(DigitalProduct("P003", "Antivirus", 45.00, 25, 350))
     return inventory
 
 def save_inventory(inventory):
@@ -160,17 +168,6 @@ def generate_report(inventory, failed_entries):
     with open(REPORT_FILE, "w", encoding="utf-8") as f:
         f.write(report + "\n")
     print(f"\nReport saved to {REPORT_FILE}")
-
-def create_product(item):
-    kind = item ["type"]
-    if kind == "physical":
-        return PhysicalProduct(item["id"], item["Product_name"],
-                               item["Price"], item["Stock"], item["Weight"])
-    elif kind == "digital":
-        return DigitalProduct(item["id"], item["Product_name"],
-                               item["Price"], item["Stock"], item["download_size"])
-    #Executes if both if statement abv fails
-    raise ValueError(f"Unknown product type: {kind}")
 
 def main():
     inventory = load_inventory()
