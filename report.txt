@@ -1,7 +1,0 @@
-==============================
-Final Report:
-==============================
-Total units processed: 80 units.
-Number of Failed/Rejected Entries: 0
-Total tax to be paid: $8.00
-==============================
