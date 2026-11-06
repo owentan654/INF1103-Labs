@@ -1,4 +1,4 @@
 FROM python:3.11-slim
 WORKDIR /app
-COPY ["OOP_auditor.py", "."]
+COPY . .
 CMD ["python", "OOP_auditor.py"]
