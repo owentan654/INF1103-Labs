@@ -21,6 +21,8 @@ def main() -> None:
         "Add product",
         "Update stock",
         "Search Product",
+        "Remove Product",
+        "Create Order",
         "Save Inventory",
         "Exit"
     ]
