@@ -1,0 +1,34 @@
+[
+    {
+        "id": "P001",
+        "Product_name": "Laptop",
+        "Price": 1200.0,
+        "Stock": 15,
+        "type": "physical",
+        "weight": 2.0
+    },
+    {
+        "id": "P002",
+        "Product_name": "Mouse",
+        "Price": 25.5,
+        "Stock": 40,
+        "type": "physical",
+        "weight": 0.1
+    },
+    {
+        "id": "P003",
+        "Product_name": "Antivirus",
+        "Price": 45.0,
+        "Stock": 25,
+        "type": "digital",
+        "download_size": 350
+    },
+    {
+        "id": "P004",
+        "Product_name": "Monitor",
+        "Price": 299.99,
+        "Stock": 5,
+        "type": "physical",
+        "weight": 5.0
+    }
+]
