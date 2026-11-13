@@ -1,4 +1,5 @@
-"""Lab 8 demonstrations. Write your 'Predict first' answers BEFORE running each section.
+"""
+Lab 8 demonstrations. Write your 'Predict first' answers BEFORE running each section.
 Run:  python test_lab8.py
 """
 from product import Product
@@ -52,7 +53,7 @@ laptop.display_information()
 
 inv_b.add_product(laptop)                      # transfer to B
 print("In B:", [p.get_name() for p in inv_b.get_products()])
-print("Same object in B as the original?", inv_b.find_product("T1") is laptop)
+print("Same object in B as the original?", inv_b.search_product("T1") is laptop)
 
 # ---------------------------------------------------------------
 section("4. COMPOSITION: Order and OrderLine")
@@ -64,14 +65,14 @@ order1.display_information()
 order2 = Order("O2")
 order2.add_order_line(laptop, 1)               # same Product, different Order
 
-line_in_1 = order1.get_order_lines()[0]
-line_in_2 = order2.get_order_lines()[0]
+line_in_1 = order1.get_orderlines()[0]
+line_in_2 = order2.get_orderlines()[0]
 print("\nOrderLine objects equal?  ", line_in_1 is line_in_2)
 print("Product objects equal?    ", line_in_1.get_product() is line_in_2.get_product())
 print("Order 1 lines / Order 2 lines:",
-      len(order1.get_order_lines()), "/", len(order2.get_order_lines()))
+      len(order1.get_orderlines()), "/", len(order2.get_orderlines()))
 
-order1.remove_order_line("T2")
+order1.remove_order_lines("T2")
 print("\nAfter removing the ebook line from Order 1:")
 order1.display_information()
 print("Ebook product still exists:", ebook.get_name())
@@ -91,7 +92,7 @@ for p in inventory.get_products():             # one loop, no isinstance()
 
 # ---------------------------------------------------------------
 section("5. TYPE HINTS evidence")
-print("Inventory.find_product:", Inventory.find_product.__annotations__)
+print("Inventory.find_product:", Inventory.search_product.__annotations__)
 print("Inventory.add_product :", Inventory.add_product.__annotations__)
 print("Product.__init__      :", Product.__init__.__annotations__)
 print("Order.add_order_line  :", Order.add_order_line.__annotations__)

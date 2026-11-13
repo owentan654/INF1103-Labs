@@ -65,7 +65,7 @@ def main() -> None:
                 continue
 
             sid = input("Supplier ID: ").strip()
-            supplier = supplier.get(sid)
+            supplier = suppliers.get(sid)
             if supplier is None:
                 sname = input("New supplier name: ").strip()
                 semail = input("Supplier email: ").strip()
@@ -73,15 +73,15 @@ def main() -> None:
                 suppliers[sid] = supplier
 
             if kind == "1":
-                product = PhysicalProduct(pid, name, price, stock, extra)
+                product = PhysicalProduct(pid, name, price, stock, supplier, extra)
             else:
-                product = DigitalProduct(pid, name, price, stock, extra)
+                product = DigitalProduct(pid, name, price, stock, supplier, extra)
             if inventory.add_product(product):
                 print("Product added.")
             else:
                 print("That ID already exists.")
                 failed_entries += 1
-
+ 
         elif choice == "3":
             product = inventory.search_product(input("Product ID: ").strip())
             if product is None:
@@ -102,12 +102,13 @@ def main() -> None:
             else:
                 print("Stock cannot be negative.")
                 failed_entries += 1
-
+ 
         elif choice == "4":
             product = inventory.search_product(input("Product ID: ").strip())
             if product:
                 product.display_information()
                 print(f"Fulfilment: {product.get_fulfilment_info()}")
+                product.get_supplier().display_information()
                 if isinstance(product, CanBeShipped):
                     print(f"Shipping cost: ${product.calculate_shipping_cost():.2f}")
             else:
@@ -129,7 +130,7 @@ def main() -> None:
                 pid = input("Product ID to add (blank to finish): ").strip()
                 if pid == "":
                     break
-                product = inventory.find_product(pid)
+                product = inventory.search_product(pid)
                 if product is None:
                     print("Product not found.")
                     failed_entries += 1
@@ -143,7 +144,7 @@ def main() -> None:
                     failed_entries += 1
                     continue
                 order.add_order_line(product, qty)
-            if order.get_order_lines():
+            if order.get_orderlines():
                 order.display_information()
             else:
                 print("Empty order discarded.")        
