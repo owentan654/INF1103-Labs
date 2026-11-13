@@ -1,13 +1,21 @@
 from inventory import Inventory
+from supplier import Supplier
 from physical_product import PhysicalProduct
 from digital_product import DigitalProduct
 from can_be_shipped import CanBeShipped
+from order import Order
 from storage import load_inventory, save_inventory, generate_report
 
 
-def main():
+def main() -> None:
     inventory = load_inventory()
     failed_entries = 0
+
+    suppliers: dict[str, Supplier] = {}
+    for p in inventory.get_products():
+        s = p.get_supplier()
+        suppliers[s.get_supplier_id()] = s
+
     menu = [
         "Display all products",
         "Add product",
@@ -53,6 +61,15 @@ def main():
                 print(f"Inventory limit exceeded {Inventory.MAX_UNITS}.")
                 failed_entries += 1
                 continue
+
+            sid = input("Supplier ID: ").strip()
+            supplier = supplier.get(sid)
+            if supplier is None:
+                sname = input("New supplier name: ").strip()
+                semail = input("Supplier email: ").strip()
+                supplier = Supplier(sid, sname, semail)
+                suppliers[sid] = supplier
+
             if kind == "1":
                 product = PhysicalProduct(pid, name, price, stock, extra)
             else:
@@ -96,9 +113,43 @@ def main():
                 failed_entries += 1
 
         elif choice == "5":
-            save_inventory(inventory)
+            removed = inventory.remove_product(input("Product ID: ").strip())
+            if removed is None:
+                print("Product not found.")
+                failed_entries += 1
+            else:
+                print(f"Removed '{removed.get_name()}' from the inventory "
+                      "(the product object itself still exists).")
 
         elif choice == "6":
+            order = Order(input("Order ID: ").strip())
+            while True:
+                pid = input("Product ID to add (blank to finish): ").strip()
+                if pid == "":
+                    break
+                product = inventory.find_product(pid)
+                if product is None:
+                    print("Product not found.")
+                    failed_entries += 1
+                    continue
+                try:
+                    qty = int(input("Quantity: "))
+                    if qty <= 0:
+                        raise ValueError
+                except ValueError:
+                    print("Quantity must be a positive whole number.")
+                    failed_entries += 1
+                    continue
+                order.add_order_line(product, qty)
+            if order.get_order_lines():
+                order.display_information()
+            else:
+                print("Empty order discarded.")        
+
+        elif choice == "7":
+            save_inventory(inventory)
+
+        elif choice == "8":
             generate_report(inventory, failed_entries)
             break
 
