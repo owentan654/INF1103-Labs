@@ -7,6 +7,7 @@ from product import Product
 from supplier import Supplier
 from physical_product import PhysicalProduct
 from digital_product import DigitalProduct
+from product_factory import ProductFactory
 
 FILE_NAME = "inventory.json"
 REPORT_FILE = "report.txt"
@@ -24,13 +25,9 @@ def create_product(item: dict, suppliers: dict[str,Supplier]) -> Product:
     """Factory: reads the saved 'type' and builds the matching subclass."""
     kind = item["type"]
     supplier = get_supplier(item["supplier"], suppliers)
-    if kind == "physical":
-        return PhysicalProduct(item["id"], item["Product_name"], item["Price"], 
-                               item["Stock"], supplier, item["weight"])
-    elif kind == "digital":
-        return DigitalProduct(item["id"], item["Product_name"], item["Price"], 
-                              item["Stock"], supplier, item["download_size"])
-    raise ValueError(f"Unknown product type: {kind}")
+    extra = item["weight"] if kind == "physical" else item["download_size"]
+    return ProductFactory.create(kind, item["id"], item["Product_name"],
+                                 item["Price"], item["Stock"], supplier, extra)
 
 
 def load_inventory() -> Inventory:
