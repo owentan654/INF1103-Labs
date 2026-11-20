@@ -1,11 +1,20 @@
+from collections.abc import Callable
 from inventory import Inventory
 from supplier import Supplier
 from product_factory import ProductFactory
-from input_helpers import get_positive_float
 from can_be_shipped import CanBeShipped
 from order import Order
-from storage import load_inventory, save_inventory, generate_report
+from input_helpers import get_positive_float
+from discount_strategy import DiscountStrategy, NoDiscount, PercentageDiscount, BulkDiscount, StudentDiscount
+from storage import load_inventory, save_inventory, generate_report, load_products
 
+
+DISCOUNT_OPTIONS: dict[str, tuple[str, callable[[], DiscountStrategy]]] = {
+    "1": ("No discount", lambda: NoDiscount()),
+    "2": ("10% off", lambda: PercentageDiscount(10)),
+    "3": ("20 off orders of 200 or more", lambda: BulkDiscount(200, 20)),
+    "4": ("Student 5% off", lambda: StudentDiscount()),
+}
 
 def main() -> None:
     inventory = load_inventory()
@@ -23,6 +32,7 @@ def main() -> None:
         "Search Product",
         "Remove Product",
         "Create Order",
+        "Import products from CSV"
         "Save Inventory",
         "Exit"
     ]
@@ -43,6 +53,7 @@ def main() -> None:
                 print("Invalid product type.")
                 failed_entries += 1
                 continue
+            product_type = "physical" if kind == "1" else "digital"
             pid = input("Product ID: ").strip()
             name = input("Product name: ").strip()
             price = get_positive_float("Price: ")
@@ -52,11 +63,8 @@ def main() -> None:
                     extra = float(input("Weight (kg): "))
                 else:
                     extra = float(input("Download size (MB): "))
-                if stock < 0 or extra < 0:
-                    raise ValueError
             except ValueError:
-                print("Invalid input entered. "
-                      "Values must be non-negative numbers.")
+                print("Stock must be a whole number and the last value a number.")
                 failed_entries += 1
                 continue
             if inventory.exceeds_limits(stock):
@@ -66,17 +74,10 @@ def main() -> None:
 
             sid = input("Supplier ID: ").strip()
             supplier = suppliers.get(sid)
-            is_new_supplier = supplier is None
-            if is_new_supplier:
+            if supplier is None:
                 sname = input("New supplier name: ").strip()
                 semail = input("Supplier email: ").strip()
                 supplier = Supplier(sid, sname, semail)
-                suppliers[sid] = supplier
-
-            if kind == "1":
-                product_type = "physical"
-            else:
-                product_type = "digital"
 
             try: 
                 product = ProductFactory.create(product_type, pid, name, price,
@@ -86,9 +87,8 @@ def main() -> None:
                 failed_entries += 1
                 continue
 
-            if is_new_supplier:
-                suppliers[sid] = supplier
             if inventory.add_product(product):
+                suppliers.setdefault(sid, supplier)
                 print("Product added.")
             else:
                 print("That ID already exists.")
@@ -109,11 +109,14 @@ def main() -> None:
             if inventory.exceeds_limits(qty - product.get_stock()):
                 print(f"Inventory limit exceeded {Inventory.MAX_UNITS}.")
                 failed_entries += 1
-            elif product.update_stock(qty):
-                print("Stock updated.")
-            else:
-                print("Stock cannot be negative.")
+                continue
+            try:
+                product.update_stock(qty)
+            except ValueError as error:
+                print(error)
                 failed_entries += 1
+            else:
+                print("Stock updated.")
  
         elif choice == "4":
             product = inventory.search_product(input("Product ID: ").strip())
@@ -155,16 +158,35 @@ def main() -> None:
                     print("Quantity must be a positive whole number.")
                     failed_entries += 1
                     continue
-                order.add_order_line(product, qty)
-            if order.get_orderlines():
-                order.display_information()
-            else:
-                print("Empty order discarded.")        
-
+                try:
+                    order.add_order_line(product, qty)
+                except ValueError as error:
+                    print(error)
+                    failed_entries += 1
+            if not order.get_orderlines():
+                print("Empty order discarded.")
+                continue
+            print("\nDiscount: ")
+            for key, (label, _) in DISCOUNT_OPTIONS.items():
+                print(f"  {key}. {label}")
+            pick = input("Choose a discount (blank for none): ").strip()
+            if pick in DISCOUNT_OPTIONS:
+                order.set_discount(DISCOUNT_OPTIONS[pick][1]())
+            elif pick != "":
+                print("Unknown discount; using no discount.")
+                failed_entries += 1
+            order.display_information()
+            
         elif choice == "7":
-            save_inventory(inventory)
+            path = input("CSV file path (blank for products.csv): ").strip() or "products.csv"
+            import_supplier = suppliers.setdefault(
+                "S000", Supplier("S000", "CSV Import", "import@example.com"))
+            load_products(path, inventory, import_supplier)           
 
         elif choice == "8":
+            save_inventory(inventory)
+
+        elif choice == "9":
             generate_report(inventory, failed_entries)
             break
 
