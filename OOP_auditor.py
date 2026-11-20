@@ -1,7 +1,7 @@
 from inventory import Inventory
 from supplier import Supplier
-from physical_product import PhysicalProduct
-from digital_product import DigitalProduct
+from product_factory import ProductFactory
+from input_helpers import get_positive_float
 from can_be_shipped import CanBeShipped
 from order import Order
 from storage import load_inventory, save_inventory, generate_report
@@ -45,14 +45,14 @@ def main() -> None:
                 continue
             pid = input("Product ID: ").strip()
             name = input("Product name: ").strip()
+            price = get_positive_float("Price: ")
             try:
-                price = float(input("Price: "))
                 stock = int(input("Stock: "))
                 if kind == "1":
                     extra = float(input("Weight (kg): "))
                 else:
                     extra = float(input("Download size (MB): "))
-                if price < 0 or stock < 0 or extra < 0:
+                if stock < 0 or extra < 0:
                     raise ValueError
             except ValueError:
                 print("Invalid input entered. "
@@ -66,16 +66,28 @@ def main() -> None:
 
             sid = input("Supplier ID: ").strip()
             supplier = suppliers.get(sid)
-            if supplier is None:
+            is_new_supplier = supplier is None
+            if is_new_supplier:
                 sname = input("New supplier name: ").strip()
                 semail = input("Supplier email: ").strip()
                 supplier = Supplier(sid, sname, semail)
                 suppliers[sid] = supplier
 
             if kind == "1":
-                product = PhysicalProduct(pid, name, price, stock, supplier, extra)
+                product_type = "physical"
             else:
-                product = DigitalProduct(pid, name, price, stock, supplier, extra)
+                product_type = "digital"
+
+            try: 
+                product = ProductFactory.create(product_type, pid, name, price,
+                                                stock, supplier, extra)
+            except ValueError as e:
+                print(f"Could not create product: {e}")
+                failed_entries += 1
+                continue
+
+            if is_new_supplier:
+                suppliers[sid] = supplier
             if inventory.add_product(product):
                 print("Product added.")
             else:
