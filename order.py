@@ -41,5 +41,5 @@ class Order:
         for line in self.__order_lines:
             line.display_information()
         print("-" * 55)
-        print(f"{'Total:':<38} {self.calculate_total():>10.2f}")
-        print(f"\nOrder {self.__order_id}")
+        print(f"{'Total:':<38} {self.__lines_total():>10.2f}")
+        print(f"{'Total after discount:':<38} {self.calculate_total():>10.2f}")
