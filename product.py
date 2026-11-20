@@ -9,13 +9,16 @@ class Product(ABC):
                  stock: int, supplier: Supplier) -> None:
         if price <= 0:
             raise ValueError("Price must be greater than zero.")
-        if stock < 0:
-            raise ValueError("Stock cannot be negative")
+        self.__validate_stock(stock)
         self.__product_id: str = product_id
         self.__name: str = name
         self.__price: float = price
         self.__stock: int = stock
         self.__supplier: Supplier = supplier
+
+    def __validate_stock(self, quantity: int) -> None:
+        if quantity < 0:
+            raise ValueError("Stock cannot be negative")
 
     # Read-only access
     def get_product_id(self) -> str:
@@ -33,11 +36,9 @@ class Product(ABC):
     def get_supplier(self) -> Supplier:
         return self.__supplier
 
-    def update_stock(self, quantity) -> bool:
-        if quantity < 0:
-            return False        # Protects its own state
+    def update_stock(self, quantity: int) -> None:
+        self.__validate_stock(quantity)     #raises ValueError if fail
         self.__stock = quantity
-        return True
 
     def display_information(self) -> None:
         print(f"{self.__product_id:<10} {self.__name:<20}"
