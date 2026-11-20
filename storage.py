@@ -7,8 +7,8 @@ from product import Product
 from supplier import Supplier
 from product_factory import ProductFactory
 
-FILE_NAME = "inventory.json"
-REPORT_FILE = "report.txt"
+FILE_NAME: str = "inventory.json"
+REPORT_FILE: str = "report.txt"
 
 
 def get_supplier(data: dict, suppliers: dict[str, Supplier]) -> Supplier:
@@ -27,6 +27,37 @@ def create_product(item: dict, suppliers: dict[str,Supplier]) -> Product:
     return ProductFactory.create(kind, item["id"], item["Product_name"],
                                  item["Price"], item["Stock"], supplier, extra)
 
+def load_products(path: str, inventory: Inventory, supplier: Supplier) -> None:
+    """Loads products from a CSV file"""
+    loaded = 0
+    try:
+        file = open(path, newline= "")
+    except FileNotFoundError:
+        print(f"Prodcuts file not found: {path}")
+
+    else:
+        with file:
+            reader = csv.reader(file)
+            next(reader, None)  # skip header
+            for line_number, row in enumerate(reader, start = 2):
+                if not row:
+                    continue
+                try:
+                    product_type, product_id, name, price, stock = row[:5]
+                    extra = float(row[5]) if len(row) > 5 else 0.0
+                    product = ProductFactory.create(
+                        product_type.strip(), product_id.strip(), name.strip(),
+                        float(price), int(stock), supplier, extra)
+                except ValueError as error:
+                    print(f"Row {line_number} skipped: {error}")
+                    continue
+                if inventory.add_product(product):
+                    loaded += 1
+                else:
+                    print(f"Row {line_number} skipped: ID '{product_id.strip()}' already exists.")
+        print(f"{loaded} products loaded.")
+    finally:
+        print("Load attempt finished.")
 
 def load_inventory() -> Inventory:
     inventory = Inventory()
@@ -72,27 +103,3 @@ def generate_report(inventory: Inventory, failed_entries: int) -> None:
     with open(REPORT_FILE, "w", encoding="utf-8") as f:
         f.write(report + "\n")
     print(f"\nReport saved to {REPORT_FILE}")
-
-def load_products(path: str, inventory: Inventory, supplier: Supplier) -> None:
-    """Loads products from a CSV file"""
-    loaded = 0
-    try:
-        file = open(path, newline= "")
-    except FileNotFoundError:
-        print(f"Prodcuts file not found: {path}")
-
-    else:
-        with file:
-            reader = csv.reader(file)
-            next(reader)  # skip header
-            for row in reader:
-                try:
-                    ptype, pid, name, price, stock = row
-                    product = ProductFactory.create(ptype, pid, name, float(price), int(stock), supplier)
-                    if inventory.add_product(product):
-                        loaded += 1
-                except ValueError as e:
-                    print(f"Skipping bad row {row}: {e}")
-        print(f"{loaded} products loaded.")
-    finally:
-        print("Load attempt finished.")
