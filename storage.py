@@ -80,3 +80,19 @@ def load_products(path: str, inventory: Inventory, supplier: Supplier) -> None:
         file = open(path, newline= "")
     except FileNotFoundError:
         print(f"Prodcuts file not found: {path}")
+
+    else:
+        with file:
+            reader = csv.reader(file)
+            next(reader)  # skip header
+            for row in reader:
+                try:
+                    ptype, pid, name, price, stock = row
+                    product = ProductFactory.create(ptype, pid, name, float(price), int(stock), supplier)
+                    if inventory.add_product(product):
+                        loaded += 1
+                except ValueError as e:
+                    print(f"Skipping bad row {row}: {e}")
+        print(f"{loaded} products loaded.")
+    finally:
+        print("Load attempt finished.")
