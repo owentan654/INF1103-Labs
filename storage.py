@@ -1,12 +1,10 @@
 """File handling: loading/saving the inventory and writing the report."""
 import json
-import os
+import os, csv
 
 from inventory import Inventory
 from product import Product
 from supplier import Supplier
-from physical_product import PhysicalProduct
-from digital_product import DigitalProduct
 from product_factory import ProductFactory
 
 FILE_NAME = "inventory.json"
@@ -22,7 +20,7 @@ def get_supplier(data: dict, suppliers: dict[str, Supplier]) -> Supplier:
 
 
 def create_product(item: dict, suppliers: dict[str,Supplier]) -> Product:
-    """Factory: reads the saved 'type' and builds the matching subclass."""
+    """Delegates creation to ProductFactory (it raises ValueError for unknown types)."""
     kind = item["type"]
     supplier = get_supplier(item["supplier"], suppliers)
     extra = item["weight"] if kind == "physical" else item["download_size"]
@@ -46,9 +44,9 @@ def load_inventory() -> Inventory:
         print("No file found. Using default products.")
         techsource = Supplier("S001", "TechSource", "sales@techsource.com")
         softworks = Supplier("S002", "SoftWorks", "hello@softworks.com")
-        inventory.add_product(PhysicalProduct("P001", "Laptop", 1200.00, 15, techsource, 2.0))
-        inventory.add_product(PhysicalProduct("P002", "Mouse", 25.50, 40, techsource, 0.1))
-        inventory.add_product(DigitalProduct("P003", "Antivirus", 45.00, 25, softworks, 350))
+        inventory.add_product(ProductFactory.create("physical", "P001", "Laptop", 1200.00, 15, techsource, 2.0))
+        inventory.add_product(ProductFactory.create("physical", "P002", "Mouse", 25.50, 40, techsource, 0.1))
+        inventory.add_product(ProductFactory.create("digital", "P003", "Antivirus", 45.00, 25, softworks, 350))
     return inventory
 
 
@@ -74,3 +72,11 @@ def generate_report(inventory: Inventory, failed_entries: int) -> None:
     with open(REPORT_FILE, "w", encoding="utf-8") as f:
         f.write(report + "\n")
     print(f"\nReport saved to {REPORT_FILE}")
+
+def load_products(path: str, inventory: Inventory, supplier: Supplier) -> None:
+    """Loads products from a CSV file"""
+    loaded = 0
+    try:
+        file = open(path, newline= "")
+    except FileNotFoundError:
+        print(f"Prodcuts file not found: {path}")
