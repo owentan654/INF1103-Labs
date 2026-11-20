@@ -11,4 +11,5 @@ class ProductFactory:
             return PhysicalProduct(product_id, name, price, stock_quantity, supplier, extra)
         elif product_type == "digital":
             return DigitalProduct(product_id, name, price, stock_quantity, supplier, extra)
-        raise ValueError(f"Unknown product type: {product_type }")
+        else:
+            raise ValueError(f"Unknown product type: {product_type }")
